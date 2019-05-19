@@ -88,7 +88,6 @@ while (1)
     
 %     Screen(theWindow, 'FillRect', bgcolor, window_rect);
 %     Screen('Flip', theWindow);
-    §°∞Ì«ÿ∂Û
 end
 
 for i = 1:10

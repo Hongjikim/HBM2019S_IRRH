@@ -52,6 +52,10 @@ else
     save(data.datafile, 'data');
 end
 
+ts_fname = filenames(fullfile(subject_dir, '*ts*'));
+
+load(ts_fname{1});
+
 %% global setting
 
 global theWindow W H; % window property
@@ -60,26 +64,66 @@ global fontsize window_rect
 
 [window_info, line_parameters, color_values] = IRRH_setscreen(screen_mode);
 
+%% sync 's' from scanner
 
-%% Visual stimuli (colors)
+while (1)
+    [~,~,keyCode] = KbCheck;
+    
+    if keyCode(KbName('s'))==1
+        break
+    elseif keyCode(KbName('q'))==1
+        abort_experiment('manual');
+    end
+    
+    %     Screen(theWindow, 'FillRect', bgcolor, window_rect);
+    %     Screen('Flip', theWindow);
+    
+end
 
+data.runscan_starttime = GetSecs; % run start timestamp
 
-
-%% Heat stimuli (PATHWAY)
-
-% send trigger to PATHWAY
-% save temperature(or/and level) to data
-
-% data.temerature = temp;
-% data.level = heat_lv;
-
-
-%% VAS rating after heat stimuli
-
-
-
-
-
+%% tasks start
+for tr_i = 1:numel(ts.stim_type)
+    dat{tr_i}.trial_start_time = GetSecs;
+    dat{tr_i}.stim_type = ts.stim_type{tr_i};
+    dat{tr_i}.stim_lv = ts.stim_lv{tr_i};
+    
+    %% Visual stimuli (colors)
+    
+    if ts.stim_type{tr_i} == 'heat'
+        for sec = 1:10
+            starttime = GetSecs;
+            color = [255*i/10 0 0];
+            Screen('DrawDots', theWindow, [W/2 H/2], 100, color, [0, 0], 1)
+            Screen('Flip', theWindow);
+            waitsec_fromstarttime(starttime, 0.3);
+        end
+    elseif ts.stim_type{tr_i} == 'cold'
+        for i = 1:10
+            starttime = GetSecs;
+            color = [0 0 255*i/10];
+            Screen('DrawDots', theWindow, [W/2 H/2], 100, color, [0, 0], 1)
+            Screen('Flip', theWindow);
+            waitsec_fromstarttime(starttime, 0.3);
+        end
+    end
+    
+    %% Heat stimuli (PATHWAY)
+    
+    % send trigger to PATHWAY
+    % save temperature(or/and level) to data
+    
+    dat{tr_i}.temerature = ts.stim_type{tr_i};
+    dat{tr_i}.level = ts.stim_lv(tr_i);
+    
+    
+    %% VAS rating after heat stimuli
+    
+    
+    
+    
+end
 %% save data
+data.dat = dat;
 save(data.datafile, 'data', '-append');
 end
