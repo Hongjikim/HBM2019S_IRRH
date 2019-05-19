@@ -1,9 +1,14 @@
 function [window_info, line_parameters, color_values] = ISRH_setscreen(screen_mode)
 
+global theWindow W H; % window property
+global white red orange bgcolor ; % color
+global fontsize window_rect 
+
     screens = Screen('Screens');
     window_num = screens(1);
     Screen('Preference', 'SkipSyncTests', 1);
     window_info = Screen('Resolution', window_num);
+
     
     switch screen_mode
         case 'Full'
