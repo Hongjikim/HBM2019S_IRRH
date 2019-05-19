@@ -75,8 +75,11 @@ while (1)
         abort_experiment('manual');
     end
     
-    %     Screen(theWindow, 'FillRect', bgcolor, window_rect);
-    %     Screen('Flip', theWindow);
+    Screen(theWindow, 'FillRect', bgcolor, window_rect);
+    Screen('TextSize', theWindow, fontsize(2));
+    ready_prompt = double('참가자가 준비되었으면, \n 이미징을 시작합니다 (s).');
+    DrawFormattedText(theWindow, ready_prompt,'center', 'center', white, [], [], [], 1.5); %'center', 'textH'
+    Screen('Flip', theWindow);
     
 end
 
@@ -86,12 +89,12 @@ data.runscan_starttime = GetSecs; % run start timestamp
 for tr_i = 1:numel(ts.stim_type)
     dat{tr_i}.trial_start_time = GetSecs;
     dat{tr_i}.stim_type = ts.stim_type{tr_i};
-    dat{tr_i}.stim_lv = ts.stim_lv{tr_i};
+    dat{tr_i}.stim_lv = ts.stim_lv(tr_i);
     
     %% Visual stimuli (colors)
     
     if ts.stim_type{tr_i} == 'heat'
-        for sec = 1:10
+        for sec = 1:12
             starttime = GetSecs;
             color = [255*i/10 0 0];
             Screen('DrawDots', theWindow, [W/2 H/2], 100, color, [0, 0], 1)
@@ -99,7 +102,7 @@ for tr_i = 1:numel(ts.stim_type)
             waitsec_fromstarttime(starttime, 0.3);
         end
     elseif ts.stim_type{tr_i} == 'cold'
-        for i = 1:10
+        for sec = 1:12
             starttime = GetSecs;
             color = [0 0 255*i/10];
             Screen('DrawDots', theWindow, [W/2 H/2], 100, color, [0, 0], 1)
@@ -119,7 +122,65 @@ for tr_i = 1:numel(ts.stim_type)
     
     %% VAS rating after heat stimuli
     
+    % setting for rating
+    rating_types = call_ratingtypes_pls;
     
+    all_start_t = GetSecs;
+    
+    scale = ('overall_int');
+    [lb, rb, start_center] = draw_scale_pls(scale, window_info, line_parameters, color_values);
+    Screen(theWindow, 'FillRect', bgcolor, window_rect);
+    
+    start_t = GetSecs;
+    dat{tr_i}.rating_starttime = start_t;
+    
+    ratetype = strcmp(rating_types.alltypes, scale);
+    
+    % Initial position
+    if start_center
+        SetMouse(W/2,H/2); % set mouse at the center
+    else
+        SetMouse(lb,H/2); % set mouse at the left
+    end
+    
+    
+    % rating start
+    while true
+        [x,~,button] = GetMouse(theWindow);
+        [lb, rb, start_center] = draw_scale_pls(scale, window_info, line_parameters, color_values);
+        if x < lb; x = lb; elseif x > rb; x = rb; end
+        
+        DrawFormattedText(theWindow, double(rating_types.prompts{ratetype}), 'center', H*(1/4), white, [], [], [], 2);
+        Screen('DrawLine', theWindow, orange, x, H*(1/2)-scale_H/3, x, H*(1/2)+scale_H/3, 6); %rating bar
+        Screen('Flip', theWindow);
+        
+        if button(1)
+            while button(1)
+                [~,~,button] = GetMouse(theWindow);
+            end
+            break
+        end
+        
+        [~,~,keyCode] = KbCheck;
+        if keyCode(KbName('q')) == 1
+            abort_experiment('manual');
+            break
+        end
+        if GetSecs - data.dat.rating_starttime(trial, Run_num) > 5
+            break
+        end
+    end
+    
+    
+    % saving rating result
+    end_t = GetSecs;
+
+    dat{tr_i}.rating = (x-lb)/(rb-lb);
+    dat{tr_i}.rating_endtime = end_t;
+    dat{tr_i}.rating_duration = end_t - start_t;
+    
+    Screen(theWindow, 'FillRect', bgcolor, window_rect);
+    Screen('Flip', theWindow);
     
     
 end
