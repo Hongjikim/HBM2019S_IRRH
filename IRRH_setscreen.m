@@ -1,4 +1,4 @@
-function [window_info, line_parameters, color_values] = ISRH_setscreen(screen_mode)
+function [window_info, line_parameters, color_values] = IRRH_setscreen(screen_mode)
 
 global theWindow W H; % window property
 global white red orange bgcolor ; % color
@@ -9,24 +9,21 @@ global fontsize window_rect
     Screen('Preference', 'SkipSyncTests', 1);
     window_info = Screen('Resolution', window_num);
 
-    
     switch screen_mode
-        case 'Full'
+        case 'full'
             window_rect = [0 0 window_info.width window_info.height]; % full screen
             fontsize = 32;
-        case 'Semifull'
+        case 'semi'
             window_rect = [0 0 window_info.width-100 window_info.height-100]; % a little bit distance
-        case 'Middle'
+        case 'middle'
             window_rect = [0 0 window_info.width/2 window_info.height/2];
-        case 'Small'
+        case 'small'
             window_rect = [0 0 400 300]; % in the test mode, use a little smaller screen
             fontsize = 10;
-        case 'Test'
+        case 'test'
+            window_ratio = 3;
             window_rect = [0 0 window_info.width window_info.height]/window_ratio;
             fontsize = 20;
-        case 'Testmode'
-            window_rect = [0 0 1440 900];  % 1920 1080]; full screen for window
-            fontsize = 32;
     end
     
     % size

@@ -14,7 +14,7 @@ for i = 1:length(varargin)
         switch varargin{i}
             % functional commands
             case {'test', 'testmode'}
-                testmode = true;
+                screen_mode = 'test';
         end
     end
 end
@@ -56,7 +56,9 @@ end
 
 global theWindow W H; % window property
 global white red orange bgcolor ; % color
-global fontsize window_rect 
+global fontsize window_rect
+
+[window_info, line_parameters, color_values] = IRRH_setscreen(screen_mode);
 
 
 %% Visual stimuli (colors)
@@ -66,7 +68,10 @@ global fontsize window_rect
 %% Heat stimuli (PATHWAY)
 
 % send trigger to PATHWAY
-% save temperature to data
+% save temperature(or/and level) to data
+
+% data.temerature = temp;
+% data.level = heat_lv;
 
 
 %% VAS rating after heat stimuli
@@ -75,5 +80,6 @@ global fontsize window_rect
 
 
 
-
+%% save data
+save(data.datafile, 'data', '-append');
 end
