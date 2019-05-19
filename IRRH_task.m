@@ -64,6 +64,27 @@ global fontsize window_rect
 
 [window_info, line_parameters, color_values] = IRRH_setscreen(screen_mode);
 
+font = window_info.font ;
+fontsize = window_info.fontsize;
+theWindow = window_info.theWindow;
+window_num = window_info.window_num ;
+window_rect = window_info.window_rect;
+H = window_info.H ;
+W = window_info.W;
+
+lb1 = line_parameters.lb1 ;
+lb2 = line_parameters.lb2 ;
+rb1 = line_parameters.rb1;
+rb2 = line_parameters.rb2;
+scale_H = line_parameters.scale_H ;
+scale_W = line_parameters.scale_W;
+anchor_lms = line_parameters.anchor_lms;
+
+bgcolor = color_values.bgcolor;
+orange = color_values.orange;
+red = color_values.red;
+white = color_values.white;
+
 %% sync 's' from scanner
 
 while (1)
@@ -76,7 +97,7 @@ while (1)
     end
     
     Screen(theWindow, 'FillRect', bgcolor, window_rect);
-    Screen('TextSize', theWindow, fontsize(2));
+    Screen('TextSize', theWindow, fontsize);
     ready_prompt = double('참가자가 준비되었으면, \n 이미징을 시작합니다 (s).');
     DrawFormattedText(theWindow, ready_prompt,'center', 'center', white, [], [], [], 1.5); %'center', 'textH'
     Screen('Flip', theWindow);
@@ -96,30 +117,34 @@ for tr_i = 1:numel(ts.stim_type)
     if ts.stim_type{tr_i} == 'heat'
         for sec = 1:12
             starttime = GetSecs;
-            color = [255*i/10 0 0];
-            Screen('DrawDots', theWindow, [W/2 H/2], 100, color, [0, 0], 1)
+            if sec < 7
+                color = [255*sec/10 0 0];
+            else
+                color = [255*(13-sec)/10 0 0];
+            end
+            Screen('DrawDots', theWindow, [W/2 H/2], 100, color, [0, 0], 1);
             Screen('Flip', theWindow);
-            waitsec_fromstarttime(starttime, 0.3);
+            waitsec_fromstarttime(starttime, 1);
         end
     elseif ts.stim_type{tr_i} == 'cold'
         for sec = 1:12
             starttime = GetSecs;
-            color = [0 0 255*i/10];
-            Screen('DrawDots', theWindow, [W/2 H/2], 100, color, [0, 0], 1)
+            if sec < 7
+                color = [0 0 255*sec/10];
+            else
+                color = [0 0 255*(13-sec)/10];
+            end
+            Screen('DrawDots', theWindow, [W/2 H/2], 100, color, [0, 0], 1);
             Screen('Flip', theWindow);
-            waitsec_fromstarttime(starttime, 0.3);
+            waitsec_fromstarttime(starttime, 1);
         end
     end
     
     %% Heat stimuli (PATHWAY)
     
     % send trigger to PATHWAY
-    % save temperature(or/and level) to data
-    
-    dat{tr_i}.temerature = ts.stim_type{tr_i};
-    dat{tr_i}.level = ts.stim_lv(tr_i);
-    
-    
+    % load stimuli type and level from ts
+     
     %% VAS rating after heat stimuli
     
     % setting for rating
@@ -166,7 +191,7 @@ for tr_i = 1:numel(ts.stim_type)
             abort_experiment('manual');
             break
         end
-        if GetSecs - data.dat.rating_starttime(trial, Run_num) > 5
+        if GetSecs - dat{tr_i}.rating_starttime > 5
             break
         end
     end
@@ -174,7 +199,7 @@ for tr_i = 1:numel(ts.stim_type)
     
     % saving rating result
     end_t = GetSecs;
-
+    
     dat{tr_i}.rating = (x-lb)/(rb-lb);
     dat{tr_i}.rating_endtime = end_t;
     dat{tr_i}.rating_duration = end_t - start_t;

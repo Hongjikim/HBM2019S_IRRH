@@ -59,7 +59,7 @@ global fontsize window_rect
     
     Screen(theWindow, 'FillRect', bgcolor, window_rect);
     Screen('Flip', theWindow);
-    HideCursor;
+    %HideCursor;
     
     %Making dictionary for return variables
     window_info = struct('W',W, 'H',H, 'window_num',window_num, 'window_rect',window_rect, 'theWindow',theWindow, 'fontsize',fontsize, 'font',font);
