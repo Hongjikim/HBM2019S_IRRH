@@ -1,4 +1,5 @@
 %% generate Trial Sequence
+% need run info (making ts for n runs)
 
 basedir = '/Users/hongji/Dropbox/Courses/1_GBME_2019S/HumanBrainMapping1/TeamProject/codes/HBM2019S_IRRH';
 datdir = fullfile(basedir, 'data'); % (, 'data');
