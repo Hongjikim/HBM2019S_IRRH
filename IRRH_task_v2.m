@@ -1,14 +1,13 @@
 function IRRH_task(varargin)
 
 %% directory set up
-basedir = 'C:\Users\no_4\Desktop\HBM2019S_IRRH-master'; %'/Users/hongji/Dropbox/Courses/1_GBME_2019S/HumanBrainMapping1/TeamProject/codes/HBM2019S_IRRH';
+basedir = '/Users/hongji/Dropbox/Courses/1_GBME_2019S/HumanBrainMapping1/TeamProject/codes/HBM2019S_IRRH';
 datdir = fullfile(basedir, 'data'); % (, 'data');
 if ~exist(datdir, 'dir'), error('You need to run this code within the IRRH directory.'); end
 addpath(genpath(basedir));
 
 %% varagin
 
-screen_mode = 'full';
 for i = 1:length(varargin)
     if ischar(varargin{i})
         switch varargin{i}
@@ -22,7 +21,7 @@ end
 %% save data
 
 sid = input('Subject ID? (e.g., R001): ', 's');
-subject_dir = fullfile(datdir, [sid '_data']);
+subject_dir = filenames(fullfile(datdir, [sid '_data']), 'char');
 if ~exist(subject_dir, 'dir')
     mkdir(fullfile(datdir, [sid '_data']));
 end
@@ -107,9 +106,9 @@ end
 data.runscan_starttime = GetSecs; % run start timestamp
 
 %% pathway setting
-ip = '192.168.0.9';
+ip = '192.168.0.20';
 port = 20121;
-genProgCode = 79;
+genProgCode = 0;
 
 %% tasks start
 for tr_i = 1:numel(ts.stim_type)
@@ -120,22 +119,23 @@ for tr_i = 1:numel(ts.stim_type)
     
     hcIdx = find(strcmp(dat{tr_i}.stim_type,{'heat','cold'}));
     lvIdx = dat{tr_i}.stim_lv;
-    progCode = str2num(dec2bin(genProgCode + lvIdx+(hcIdx-1)*2));
-    main(ip,port, 1, progCode);
-    trigger_time = GetSecs;
-    waitsec_fromstarttime(trigger_time, 1);
+    progCode = genProgCode + lvIdx+(hcIdx-1)*2;
+    
+    main(ip,port, 1, progCode); % pathway program open
+    
     %% Visual stimuli (colors)
-    colIntenLv = round(255*[2:2:8,repmat(10,1,5),7:-3:1]./10);
+    colIntenLv = 255*[1:6,6:-1:1]./10;
     for sec = 1:12
         starttime = GetSecs;
-        if strcmp(ts.stim_type{tr_i},'heat'), color = [colIntenLv(sec),0,0]; else color = [0,0,colIntenLv(sec)]; end
+        if strcmp(ts.stim_type{tr_i},'heat'), color = [colIntenLv,0,0]; else color = [0,0,colIntenLv]; end
+        if sec == 1, main(ip,port, 2); end % pathway program trigger
         
         Screen('DrawDots', theWindow, [W/2 H/2], 100, color, [0, 0], 1);
         Screen('Flip', theWindow);
         waitsec_fromstarttime(starttime, 1);
-    end
+    end   
     
-    
+     
     %% VAS rating after heat stimuli
     
     % setting for rating
@@ -182,7 +182,7 @@ for tr_i = 1:numel(ts.stim_type)
             abort_experiment('manual');
             break
         end
-        if GetSecs - dat{tr_i}.rating_starttime > 8
+        if GetSecs - dat{tr_i}.rating_starttime > 5
             break
         end
     end
@@ -199,7 +199,6 @@ for tr_i = 1:numel(ts.stim_type)
     Screen('Flip', theWindow);
     
     
-    waitsec_fromstarttime( dat{tr_i}.rating_starttime, 10);
 end
 %% save data
 data.dat = dat;
