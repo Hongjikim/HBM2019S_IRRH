@@ -1,6 +1,7 @@
 function IRRH_task(varargin)
 
 %% directory set up
+
 basedir = '/Users/hongji/Dropbox/Courses/1_GBME_2019S/HumanBrainMapping1/TeamProject/codes/HBM2019S_IRRH';
 datdir = fullfile(basedir, 'data'); % (, 'data');
 if ~exist(datdir, 'dir'), error('You need to run this code within the IRRH directory.'); end
@@ -105,36 +106,44 @@ end
 
 data.runscan_starttime = GetSecs; % run start timestamp
 
-%% pathway setting
-ip = '192.168.0.20';
-port = 20121;
-genProgCode = 0;
-
 %% tasks start
 for tr_i = 1:numel(ts.stim_type)
     dat{tr_i}.trial_start_time = GetSecs;
     dat{tr_i}.stim_type = ts.stim_type{tr_i};
     dat{tr_i}.stim_lv = ts.stim_lv(tr_i);
     
-    
-    hcIdx = find(strcmp(dat{tr_i}.stim_type,{'heat','cold'}));
-    lvIdx = dat{tr_i}.stim_lv;
-    progCode = genProgCode + lvIdx+(hcIdx-1)*2;
-    
-    main(ip,port, 1, progCode); % pathway program open
-    
     %% Visual stimuli (colors)
-    colIntenLv = 255*[1:6,6:-1:1]./10;
-    for sec = 1:12
-        starttime = GetSecs;
-        if strcmp(ts.stim_type{tr_i},'heat'), color = [colIntenLv,0,0]; else color = [0,0,colIntenLv]; end
-        if sec == 1, main(ip,port, 2); end % pathway program trigger
-        
-        Screen('DrawDots', theWindow, [W/2 H/2], 100, color, [0, 0], 1);
-        Screen('Flip', theWindow);
-        waitsec_fromstarttime(starttime, 1);
-    end   
     
+    if ts.stim_type{tr_i} == 'heat'
+        for sec = 1:12
+            starttime = GetSecs;
+            if sec < 7
+                color = [255*sec/10 0 0];
+            else
+                color = [255*(13-sec)/10 0 0];
+            end
+            Screen('DrawDots', theWindow, [W/2 H/2], 100, color, [0, 0], 1);
+            Screen('Flip', theWindow);
+            waitsec_fromstarttime(starttime, 1);
+        end
+    elseif ts.stim_type{tr_i} == 'cold'
+        for sec = 1:12
+            starttime = GetSecs;
+            if sec < 7
+                color = [0 0 255*sec/10];
+            else
+                color = [0 0 255*(13-sec)/10];
+            end
+            Screen('DrawDots', theWindow, [W/2 H/2], 100, color, [0, 0], 1);
+            Screen('Flip', theWindow);
+            waitsec_fromstarttime(starttime, 1);
+        end
+    end
+    
+    %% Heat stimuli (PATHWAY)
+    
+    % send trigger to PATHWAY
+    % load stimuli type and level from ts
      
     %% VAS rating after heat stimuli
     
