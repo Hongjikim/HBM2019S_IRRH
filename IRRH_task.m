@@ -2,7 +2,7 @@ function IRRH_task(varargin)
 
 %% directory set up
 basedir = 'C:\Users\no_4\Desktop\HBM2019S_IRRH-master'; %'/Users/hongji/Dropbox/Courses/1_GBME_2019S/HumanBrainMapping1/TeamProject/codes/HBM2019S_IRRH';
-datdir = fullfile(basedir, 'data'); % (, 'data');
+datdir = fullfile(basedir, 'data'); 
 if ~exist(datdir, 'dir'), error('You need to run this code within the IRRH directory.'); end
 addpath(genpath(basedir));
 
@@ -122,13 +122,21 @@ for tr_i = 1:numel(ts.stim_type)
     lvIdx = dat{tr_i}.stim_lv;
     progCode = str2num(dec2bin(genProgCode + lvIdx+(hcIdx-1)*2));
     main(ip,port, 1, progCode);
+    
+    % wait until the pathway receives the trigger
     trigger_time = GetSecs;
     waitsec_fromstarttime(trigger_time, 1);
+    
     %% Visual stimuli (colors)
     colIntenLv = round(255*[2:2:8,repmat(10,1,5),7:-3:1]./10);
     for sec = 1:12
         starttime = GetSecs;
-        if strcmp(ts.stim_type{tr_i},'heat'), color = [colIntenLv(sec),0,0]; else color = [0,0,colIntenLv(sec)]; end
+        
+        if strcmp(ts.stim_type{tr_i},'heat')
+            color = [colIntenLv(sec),0,0];
+        else
+            color = [0,0,colIntenLv(sec)];
+        end
         
         Screen('DrawDots', theWindow, [W/2 H/2], 100, color, [0, 0], 1);
         Screen('Flip', theWindow);
