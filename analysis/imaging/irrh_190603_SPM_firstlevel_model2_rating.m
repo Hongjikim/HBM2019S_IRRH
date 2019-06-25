@@ -9,7 +9,7 @@
 basedir = '/Users/hongji/Dropbox/IRRH_2019S';
 scriptdir = '/Users/hongji/Dropbox/IRRH_2019S/scripts_git/analysis/imaging';
 img_dir = fullfile(basedir, '/IRRH_imaging/preprocessed');
-modeldir = fullfile(scriptdir, '/first_level/model1');
+modeldir = fullfile(scriptdir, '/first_level/model2');
 
 if ~exist(modeldir, 'dir'), mkdir(modeldir); end
 
@@ -22,6 +22,9 @@ load('stim_type.mat');
 load('colors_type.mat');
 load('duration_stim.mat');
 load('names_stim.mat');
+load('onsets_rating.mat');
+load('names_rating.mat');
+load('duration_rating.mat');
 
 %% loop for subjects
 d = [];
@@ -41,9 +44,10 @@ for sub_j = 1:numel(subjects)
     TR = 0.46;
     hpfilterlen = 180;
     images_by_run = filenames(fullfile(subj_dir, 'func/sw*task-RB*.nii'));
-    conditions_per_run = [18 18 18 18 18];
+    conditions_per_run = [18 18 18 18 18]+1;
     
-    stim_run_idx = repmat(1:5, 18,1); stim_run_idx = stim_run_idx(:); % 160 x 1
+    stim_run_idx = repmat(1:5, 18,1); stim_run_idx = stim_run_idx(:); % 90 x 1
+    rating_select_run_idx = repmat(1:5, 18,1); rating_select_run_idx = rating_select_run_idx(:);  % 90 x 1
     
     onsets = [];
     durations = [];
@@ -65,6 +69,18 @@ for sub_j = 1:numel(subjects)
         names = [names;names_temp];
         
         clear *_temp;
+           
+            onsets_temp{1} = [onsets_rating(sub_j, rating_select_run_idx==run_i)'];
+            onsets = [onsets;onsets_temp];  % 164 x 1
+            
+            duration_temp{1} = [duration_rating(sub_j, rating_select_run_idx==run_i)'];
+            durations = [durations;duration_temp];
+            
+            names_temp = names_rating(sub_j, rating_select_run_idx==run_i)';
+            names = [names;{'rating'}];     % 164 x 1, 160 = view, 4 = rating
+            
+        clear *_temp;
+         
     end
     
     %% prepare and save nuisance

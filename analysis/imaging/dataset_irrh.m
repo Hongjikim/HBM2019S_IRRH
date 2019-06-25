@@ -7,7 +7,7 @@ for sub_i = 1:2
     subjects = canlab_list_subjects(img_dir, 'sub-irrh*');
     subject_dir = filenames(fullfile(taskdat_dir, ['*', subjects{sub_i}(end), '*']), 'char');
     fnames_run = filenames(fullfile(subject_dir, '*run0*'));
-    clear stim_onset
+    clear stim_onset color_temp stim_temp duration_temp rating_temp
     
     for run_i = [1:2, 4:6]
         if run_i > 3
@@ -22,6 +22,9 @@ for sub_i = 1:2
             color_temp(run_n, tr_i) = data.dat{tr_i}.color_type;
             stim_temp(run_n, tr_i) = data.dat{tr_i}.stim_type;
             duration_temp(run_n, tr_i) = data.dat{tr_i}.rating_starttime - data.dat{tr_i}.stim_start_time;
+            
+            rating_onset(run_n, tr_i) = data.dat{tr_i}.rating_starttime - data.runscan_starttime_skey - (0.46*18);
+            duration_rating_temp(run_n, tr_i) = data.dat{tr_i}.rating_duration;
         end
     end
     
@@ -29,12 +32,19 @@ for sub_i = 1:2
     colors_type(sub_i,:) = reshape(color_temp', 1, 90) ;
     stim_type(sub_i,:) = reshape(stim_temp', 1, 90) ;
     duration_stim(sub_i,:) = reshape(duration_temp', 1, 90);
+    
+    onsets_rating(sub_i,:) = reshape(rating_onset', 1, 90);
+    duration_rating(sub_i,:) = reshape(duration_rating_temp', 1, 90);
 end
 
+%%
 save('onsets_stim.mat', 'onsets_stim');
 save('colors_type.mat', 'colors_type');
 save('stim_type.mat', 'stim_type');
 save('duration_stim.mat', 'duration_stim');
+%%
+save('onsets_rating.mat', 'onsets_rating');
+save('duration_rating.mat', 'duration_rating');
 
 %% name
 for subj = 1:size(colors_type,1)
@@ -60,3 +70,13 @@ for subj = 1:size(colors_type,1)
 end
 
 save('names_stim.mat', 'names_stim');
+
+%% name for rating
+
+for subj = 1:size(onsets_rating,1)
+    for rating_i = 1:size(onsets_rating,2)
+        names_rating{subj, rating_i} = 'rating';
+    end
+end
+
+save('names_rating.mat', 'names_rating')

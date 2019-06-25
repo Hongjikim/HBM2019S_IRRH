@@ -9,7 +9,7 @@
 basedir = '/Users/hongji/Dropbox/IRRH_2019S';
 scriptdir = '/Users/hongji/Dropbox/IRRH_2019S/scripts_git/analysis/imaging';
 img_dir = fullfile(basedir, '/IRRH_imaging/preprocessed');
-modeldir = fullfile(scriptdir, '/first_level/model1');
+modeldir = fullfile(scriptdir, '/first_level/model3');
 
 if ~exist(modeldir, 'dir'), mkdir(modeldir); end
 
@@ -17,6 +17,7 @@ subjects = canlab_list_subjects(img_dir, 'sub-irrh*');
 
 %% read canlab_dataset
 % onsets
+cd('/Users/hongji/Dropbox/IRRH_2019S/scripts_git/analysis/imaging'); 
 load('onsets_stim.mat'); % 2 x 90
 load('stim_type.mat');
 load('colors_type.mat');
@@ -25,7 +26,7 @@ load('names_stim.mat');
 
 %% loop for subjects
 d = [];
-for sub_j = 1:numel(subjects)
+for sub_j = 1:2 %numel(subjects)
     % session number = 1 && mri_inclusion = 1(it means normal)    n = 61
     % d = [d datetime('now')]
     
@@ -105,6 +106,7 @@ for sub_j = 1:numel(subjects)
     save(fullfile(subj_outputdir, 'spm_model_spec_estimate_job.mat'), 'matlabbatch');
     spm_jobman('run', matlabbatch);
     
+    %
     cd(subj_outputdir);
     out = scn_spm_design_check(subj_outputdir, 'events_only');
     
@@ -121,8 +123,8 @@ for sub_j = 1:numel(subjects)
     end
     
     j= 0;
-    for run_i = 1:4
-        for trial_i = 1:40
+    for run_i = 1:5
+        for trial_i = 1:18
             j = j+1;
             eval(sprintf('!ln -s beta_%04d.nii stim_%03d.nii', find(contains(SPM.xX.name, sprintf('Sn(%d) stim_%02d', run_i, trial_i))), j));
         end
